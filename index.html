@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Semantic Engagement — Built From Scratch</title>
+<meta name="description" content="An original from-scratch build that predicts short-video engagement from the meaning of captions — using sentence embeddings, not just hashtags and metrics." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --accent:#0ea5e9; --accent-soft:#e6f4fd; --ink:#0c1c28; --muted:#47606f;
+    --line:#d3e7f3; --bg:#f6fbfe; --card:#ffffff;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 28px}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:var(--mono);font-size:.86em;background:var(--accent-soft);padding:.1em .4em;border-radius:4px;color:#0369a1}
+  h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.15;letter-spacing:-.01em}
+  header.hero{padding:88px 0 56px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:0 0 22px}
+  h1{font-size:clamp(2.6rem,6vw,4.1rem);margin:0 0 18px}
+  .lede{font-size:1.22rem;color:var(--muted);max-width:62ch;margin:0 0 28px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;font-size:.82rem}
+  .chip{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--muted);background:var(--card)}
+  section{padding:54px 0;border-bottom:1px solid var(--line)}
+  .kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+  h2{font-size:clamp(1.7rem,3.4vw,2.3rem);margin:0 0 20px}
+  h3{font-size:1.2rem;margin:0 0 6px}
+  p{margin:0 0 18px;max-width:68ch}
+  .muted{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:8px}
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .tool .t{font-family:var(--mono);font-size:.78rem;color:var(--accent);letter-spacing:.04em;margin-bottom:8px}
+  .tool h3{font-size:1.05rem;font-family:var(--sans);font-weight:600;margin-bottom:6px}
+  .tool p{font-size:.92rem;color:var(--muted);margin:0}
+  ol.flow{counter-reset:s;list-style:none;padding:0;margin:24px 0 0}
+  ol.flow li{position:relative;padding:18px 0 18px 56px;border-top:1px solid var(--line)}
+  ol.flow li:before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:18px;font-family:var(--mono);font-size:.8rem;color:var(--accent);border:1px solid var(--line);border-radius:8px;width:38px;height:38px;display:grid;place-items:center;background:var(--card)}
+  ol.flow li h3{font-family:var(--sans);font-size:1.02rem;font-weight:600;margin:0 0 4px}
+  ol.flow li p{margin:0;font-size:.93rem;color:var(--muted)}
+  .callout{background:var(--accent-soft);border:1px solid #bfe1f5;border-radius:14px;padding:24px 26px;margin-top:8px}
+  .callout p:last-child{margin:0}
+  ul.learn{list-style:none;padding:0;margin:8px 0 0}
+  ul.learn li{padding:14px 0 14px 30px;border-top:1px solid var(--line);position:relative;color:var(--muted);max-width:68ch}
+  ul.learn li:before{content:"→";position:absolute;left:0;color:var(--accent);font-family:var(--mono)}
+  ul.learn li b{color:var(--ink);font-weight:600}
+  .price{display:flex;align-items:baseline;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px;margin-top:8px}
+  .price .n{font-family:var(--serif);font-size:2.6rem;color:var(--accent);line-height:1}
+  .price .l{color:var(--muted);font-size:.95rem}
+  footer{padding:48px 0 80px}
+  .credit{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px}
+  .credit .k{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  footer .fine{font-size:.8rem;color:var(--muted);margin-top:22px;text-align:center}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">From-Scratch Build · Natural Language Processing</p>
+    <h1>Semantic Engagement</h1>
+    <p class="lede">Why does one short video explode and a near-identical one sink? Part of the answer is hiding in the caption — not the hashtags, the <i>meaning</i>. This build predicts engagement from the semantics of the text, turning captions into embeddings and learning what kinds of meaning travel. I rebuilt it from scratch to see how far language alone can explain virality.</p>
+    <div class="meta">
+      <span class="chip">Python</span><span class="chip">Sentence embeddings</span><span class="chip">Transformers</span>
+      <span class="chip">Regression</span><span class="chip">Feature analysis</span><span class="chip">NLP</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">What it is</p>
+    <h2>Predicting reach from meaning</h2>
+    <p>Most engagement models lean on surface signals — follower count, posting time, hashtag popularity. This one asks a harder question: can the <i>semantic content</i> of a caption, on its own, predict how a video performs? To answer it, every caption is mapped into a high-dimensional embedding where similar meanings sit close together, and a model learns the relationship between that meaning-space and real engagement numbers.</p>
+    <p>It's a clean way to study a messy phenomenon. By stripping away the metadata and keeping only the language, you isolate exactly how much of engagement is explained by <i>what was said</i> — and which themes, tones and framings consistently land.</p>
+    <div class="price">
+      <div class="n">384+</div>
+      <div class="l">dimensions in each caption embedding — a dense vector that captures meaning where a bag of hashtags captures almost nothing.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">The stack</p>
+    <h2>From caption to engagement estimate</h2>
+    <p class="muted">Embeddings turn language into something a model can actually learn from.</p>
+    <div class="grid">
+      <div class="tool"><div class="t">data</div><h3>Caption + metrics</h3><p>A dataset pairing each video's caption with its real engagement — the signal to be explained.</p></div>
+      <div class="tool"><div class="t">clean</div><h3>Text preprocessing</h3><p>Normalise emojis, mentions and noise so the model sees the meaning, not the typing.</p></div>
+      <div class="tool"><div class="t">represent</div><h3>Sentence embeddings</h3><p>A transformer encodes each caption into a dense vector that captures its semantics.</p></div>
+      <div class="tool"><div class="t">model</div><h3>Engagement regressor</h3><p>Learn the mapping from embedding to predicted engagement, scored against held-out videos.</p></div>
+      <div class="tool"><div class="t">explain</div><h3>Theme clustering</h3><p>Cluster the embedding space to surface which kinds of meaning over- and under-perform.</p></div>
+      <div class="tool"><div class="t">evaluate</div><h3>Correlation &amp; error</h3><p>Measure how much of engagement the language alone genuinely accounts for.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Architecture</p>
+    <h2>How a prediction is made</h2>
+    <p>Every caption travels the same path from text to number:</p>
+    <ol class="flow">
+      <li><h3>Collect</h3><p>Assemble captions paired with their engagement figures.</p></li>
+      <li><h3>Preprocess</h3><p>Clean and normalise the text into a consistent form.</p></li>
+      <li><h3>Embed</h3><p>Encode each caption into a semantic vector with a transformer.</p></li>
+      <li><h3>Fit</h3><p>Train a regressor to predict engagement from the embedding.</p></li>
+      <li><h3>Interpret</h3><p>Analyse which regions of meaning-space the model rewards, and report the error honestly.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Reflection</p>
+    <h2>What rebuilding it taught me</h2>
+    <ul class="learn">
+      <li><b>Embeddings unlock text.</b> Raw captions are unusable to a regressor; a sentence embedding turns meaning into geometry a model can fit.</li>
+      <li><b>Semantics explains some, not all.</b> Language is a real signal but only part of the story — being honest about the unexplained variance matters.</li>
+      <li><b>Clustering tells the story.</b> The most interesting output isn't the prediction, it's seeing which themes consistently win.</li>
+      <li><b>Preprocessing is quietly decisive.</b> How you handle emojis and mentions changes what "meaning" the model even sees.</li>
+      <li><b>Correlation ≠ causation, loudly.</b> A theme that predicts engagement isn't a recipe to cause it — easy to forget, important to say.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="credit">
+      <div class="k">About this build</div>
+      <p style="margin:0">An original, from-scratch build by <b>Andrea</b> — written to learn semantic NLP applied to a real prediction task: text preprocessing, sentence embeddings, regression and interpreting meaning-space. Plain HTML/CSS, deployed on GitHub Pages.</p>
+    </div>
+    <p class="fine">Built from scratch by Andrea · one of an ongoing series of learning builds.</p>
+  </div>
+</footer>
+</body>
+</html>
