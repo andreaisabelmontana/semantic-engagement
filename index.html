@@ -66,8 +66,8 @@
     <h1>Semantic Engagement</h1>
     <p class="lede">Why does one short video explode and a near-identical one sink? Part of the answer is hiding in the caption — not the hashtags, the <i>meaning</i>. This build predicts engagement from the semantics of the text, turning captions into embeddings and learning what kinds of meaning travel. I rebuilt it from scratch to see how far language alone can explain virality.</p>
     <div class="meta">
-      <span class="chip">Python</span><span class="chip">Sentence embeddings</span><span class="chip">Transformers</span>
-      <span class="chip">Regression</span><span class="chip">Feature analysis</span><span class="chip">NLP</span>
+      <span class="chip">Python</span><span class="chip">LSA embeddings</span><span class="chip">scikit-learn</span>
+      <span class="chip">Ridge regression</span><span class="chip">Held-out eval</span><span class="chip">NLP</span>
     </div>
   </div>
 </header>
@@ -76,11 +76,11 @@
   <div class="wrap">
     <p class="kicker">What it is</p>
     <h2>Predicting reach from meaning</h2>
-    <p>Most engagement models lean on surface signals — follower count, posting time, hashtag popularity. This one asks a harder question: can the <i>semantic content</i> of a caption, on its own, predict how a video performs? To answer it, every caption is mapped into a high-dimensional embedding where similar meanings sit close together, and a model learns the relationship between that meaning-space and real engagement numbers.</p>
-    <p>It's a clean way to study a messy phenomenon. By stripping away the metadata and keeping only the language, you isolate exactly how much of engagement is explained by <i>what was said</i> — and which themes, tones and framings consistently land.</p>
+    <p>Most engagement models lean on surface signals — follower count, posting time, hashtag popularity. This one asks a harder question: can the <i>semantic content</i> of a caption, on its own, predict how a video performs? To answer it cleanly, every caption is mapped into a 64-dimensional LSA embedding where similar meanings sit close together, and a Ridge model learns the relationship between that meaning-space and an engagement index — measured on a controlled synthetic dataset so the answer is verifiable.</p>
+    <p>It's a clean way to study a messy phenomenon. On a controlled synthetic dataset where engagement is planted to depend on <i>topic and sentiment</i> — not length or hashtag count — you can measure exactly how much the meaning explains, and prove a metadata baseline can't keep up.</p>
     <div class="price">
-      <div class="n">384+</div>
-      <div class="l">dimensions in each caption embedding — a dense vector that captures meaning where a bag of hashtags captures almost nothing.</div>
+      <div class="n">0.69</div>
+      <div class="l">held-out R² from the semantic model — versus ≈0.00 for a metadata-only baseline (length, #hashtags, #emoji) on the same split. The signal really does live in the meaning.</div>
     </div>
   </div>
 </section>
@@ -91,12 +91,12 @@
     <h2>From caption to engagement estimate</h2>
     <p class="muted">Embeddings turn language into something a model can actually learn from.</p>
     <div class="grid">
-      <div class="tool"><div class="t">data</div><h3>Caption + metrics</h3><p>A dataset pairing each video's caption with its real engagement — the signal to be explained.</p></div>
-      <div class="tool"><div class="t">clean</div><h3>Text preprocessing</h3><p>Normalise emojis, mentions and noise so the model sees the meaning, not the typing.</p></div>
-      <div class="tool"><div class="t">represent</div><h3>Sentence embeddings</h3><p>A transformer encodes each caption into a dense vector that captures its semantics.</p></div>
-      <div class="tool"><div class="t">model</div><h3>Engagement regressor</h3><p>Learn the mapping from embedding to predicted engagement, scored against held-out videos.</p></div>
-      <div class="tool"><div class="t">explain</div><h3>Theme clustering</h3><p>Cluster the embedding space to surface which kinds of meaning over- and under-perform.</p></div>
-      <div class="tool"><div class="t">evaluate</div><h3>Correlation &amp; error</h3><p>Measure how much of engagement the language alone genuinely accounts for.</p></div>
+      <div class="tool"><div class="t">data</div><h3>Synthetic captions</h3><p>1,200 seeded captions whose engagement is planted to depend on topic and sentiment — known ground truth, clearly labelled synthetic.</p></div>
+      <div class="tool"><div class="t">represent</div><h3>LSA embeddings</h3><p>TF-IDF over 1–2 grams then truncated SVD to 64 dimensions, L2-normalised. Fully local, fast, deterministic — no model download.</p></div>
+      <div class="tool"><div class="t">model</div><h3>Ridge regressor</h3><p>The standardised embedding feeds a Ridge model predicting a 0–100 engagement index. GradientBoosting is supported too.</p></div>
+      <div class="tool"><div class="t">baseline</div><h3>Metadata-only</h3><p>The same regressor on length, word count, #hashtags and #emoji — the surface signals a semantic model is meant to beat.</p></div>
+      <div class="tool"><div class="t">evaluate</div><h3>Held-out R² &amp; r</h3><p>Both models scored on the same 25% test split, embedder fit on train only — no leakage. Semantic R²≈0.69 vs ≈0.00.</p></div>
+      <div class="tool"><div class="t">test</div><h3>pytest suite</h3><p>11 tests: semantic beats baseline, embedding shapes/dims, and deterministic results under a fixed seed.</p></div>
     </div>
   </div>
 </section>
@@ -107,11 +107,11 @@
     <h2>How a prediction is made</h2>
     <p>Every caption travels the same path from text to number:</p>
     <ol class="flow">
-      <li><h3>Collect</h3><p>Assemble captions paired with their engagement figures.</p></li>
-      <li><h3>Preprocess</h3><p>Clean and normalise the text into a consistent form.</p></li>
-      <li><h3>Embed</h3><p>Encode each caption into a semantic vector with a transformer.</p></li>
-      <li><h3>Fit</h3><p>Train a regressor to predict engagement from the embedding.</p></li>
-      <li><h3>Interpret</h3><p>Analyse which regions of meaning-space the model rewards, and report the error honestly.</p></li>
+      <li><h3>Generate</h3><p>Build seeded synthetic captions whose engagement is planted to depend on topic and sentiment.</p></li>
+      <li><h3>Split</h3><p>Hold out 25% for testing; the embedder only ever sees the training captions.</p></li>
+      <li><h3>Embed</h3><p>Encode each caption into a 64-dim LSA vector (TF-IDF + truncated SVD).</p></li>
+      <li><h3>Fit</h3><p>Train a Ridge regressor to predict the engagement index from the embedding.</p></li>
+      <li><h3>Compare</h3><p>Score against a metadata-only baseline on the same split and report held-out R² honestly.</p></li>
     </ol>
   </div>
 </section>
@@ -121,10 +121,10 @@
     <p class="kicker">Reflection</p>
     <h2>What rebuilding it taught me</h2>
     <ul class="learn">
-      <li><b>Embeddings unlock text.</b> Raw captions are unusable to a regressor; a sentence embedding turns meaning into geometry a model can fit.</li>
-      <li><b>Semantics explains some, not all.</b> Language is a real signal but only part of the story — being honest about the unexplained variance matters.</li>
-      <li><b>Clustering tells the story.</b> The most interesting output isn't the prediction, it's seeing which themes consistently win.</li>
-      <li><b>Preprocessing is quietly decisive.</b> How you handle emojis and mentions changes what "meaning" the model even sees.</li>
+      <li><b>Embeddings unlock text.</b> Raw captions are unusable to a regressor; an LSA embedding turns word usage into geometry a Ridge model can fit — here to R²≈0.69.</li>
+      <li><b>A fair baseline is the whole point.</b> The result only means something because the metadata baseline (≈0.00) was given an honest shot on the same split.</li>
+      <li><b>Design the data so the truth is knowable.</b> Planting engagement on topic — and sampling hashtags/emoji independently — is what makes "meaning beats metadata" testable rather than assumed.</li>
+      <li><b>LSA is honest, not magic.</b> It captures topical similarity, not sarcasm or word order — a transformer could slot in as the embedder, but the default is local and reproducible.</li>
       <li><b>Correlation ≠ causation, loudly.</b> A theme that predicts engagement isn't a recipe to cause it — easy to forget, important to say.</li>
     </ul>
   </div>
@@ -134,7 +134,7 @@
   <div class="wrap">
     <div class="credit">
       <div class="k">About this build</div>
-      <p style="margin:0">An original, from-scratch build by <b>Andrea</b> — written to learn semantic NLP applied to a real prediction task: text preprocessing, sentence embeddings, regression and interpreting meaning-space. Plain HTML/CSS, deployed on GitHub Pages.</p>
+      <p style="margin:0">An original, from-scratch build by <b>Andrea</b> — written to learn semantic NLP applied to a prediction task: LSA sentence embeddings, Ridge regression, a fair metadata baseline and honest held-out evaluation. The Python package, synthetic dataset and pytest suite live in the <a href="https://github.com/andreaisabelmontana/semantic-engagement">GitHub repo</a>.</p>
     </div>
     <p class="fine">Built from scratch by Andrea · one of an ongoing series of learning builds.</p>
   </div>

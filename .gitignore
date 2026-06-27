@@ -5,3 +5,10 @@ Thumbs.db
 node_modules/
 dist/
 build/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
